@@ -28,7 +28,7 @@ function ViewReportDailog({record}:props) {
       </DialogTitle>
       <DialogDescription>
         <div className='mt-10'>
-            <h2 className='font-bold text-blue-500 text-lg'>Video Info</h2>
+            <h2 className='font-bold text-blue-500 text-lg'>Consult Info</h2>
             <div className='grid grid-cols-2'>
              
                     <h2><span className='font-bold'> Doctor Specialization: </span>{record.selectedDoctor?.specialist}</h2>
