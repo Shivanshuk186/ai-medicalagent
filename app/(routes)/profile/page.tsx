@@ -44,6 +44,8 @@ export default function ProfilePage() {
         consultations: historyResult.data?.length || 0,
         credits: result.data?.credits || 0
       });
+      
+      toast.success('Profile refreshed');
     } catch (err) {
       console.error('Error fetching user data:', err);
       toast.error('Failed to load profile data');
@@ -73,9 +75,19 @@ export default function ProfilePage() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-            <IconUser size={16} />
-            Account Settings
+          <div className="mb-4 flex items-center justify-between">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+              <IconUser size={16} />
+              Account Settings
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={fetchUserData}
+              disabled={loading}
+            >
+              {loading ? 'Refreshing...' : 'Refresh Status'}
+            </Button>
           </div>
           <h1 className="mb-2 text-4xl font-bold tracking-tight md:text-5xl">
             Your

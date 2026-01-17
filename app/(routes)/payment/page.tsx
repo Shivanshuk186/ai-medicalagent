@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { motion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { IconArrowLeft, IconCheck, IconCopy, IconQrcode, IconLoader2 } from '@tabler/icons-react';
@@ -9,15 +9,53 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
+import { UserDetailContext } from '@/context/UserDetailcontext';
 
 export default function PaymentPage() {
   const [transactionId, setTransactionId] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const { refreshUserDetails } = useContext(UserDetailContext);
   const router = useRouter();
 
   const UPI_ID = '7303774374@ptsbi';
   const AMOUNT = '999';
+
+  // Check payment status periodically after submission
+  useEffect(() => {
+    if (!paymentSubmitted) return;
+
+    const checkStatus = async () => {
+      try {
+        const response = await axios.get('/api/payment/status');
+        const approvedPayment = response.data.payments?.find(
+          (p: any) => p.status === 'approved' && p.transactionId === transactionId.trim()
+        );
+
+        if (approvedPayment) {
+          // Refresh user details to get updated premium status
+          if (refreshUserDetails) {
+            await refreshUserDetails();
+          }
+          toast.success('🎉 Payment approved! You now have premium access!');
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    };
+
+    // Check immediately
+    checkStatus();
+
+    // Then check every 10 seconds
+    const interval = setInterval(checkStatus, 10000);
+
+    return () => clearInterval(interval);
+  }, [paymentSubmitted, transactionId, router, refreshUserDetails]);
 
   const copyUpiId = () => {
     navigator.clipboard.writeText(UPI_ID);
@@ -41,11 +79,11 @@ export default function PaymentPage() {
       });
 
       if (response.data.success) {
+        setPaymentSubmitted(true);
         toast.success('Payment submitted successfully!');
-        toast.info('Your payment is under review. You will be notified once approved.');
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 2000);
+        toast.info('Checking for approval... Please wait.', {
+          duration: 5000,
+        });
       }
     } catch (error: any) {
       console.error('Error submitting payment:', error);

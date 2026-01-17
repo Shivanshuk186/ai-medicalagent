@@ -47,7 +47,7 @@ function HistoryTable({ historyList }: Props) {
                                     <div className='flex items-center gap-3'>
                                         <div className='h-10 w-10 flex-shrink-0 overflow-hidden rounded-full'>
                                             <Image 
-                                                src={record.selectedDoctor.image}
+                                                src={record.selectedDoctor.image || '/placeholder-doctor.png'}
                                                 alt={record.selectedDoctor.specialist}
                                                 width={40}
                                                 height={40}

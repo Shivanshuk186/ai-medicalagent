@@ -81,6 +81,22 @@ function Provider({
         }
     }
 
+    const refreshUserDetails = async() => {
+        try {
+            if (!user) return;
+            
+            const result = await axios.post("/api/users", {}, {
+                timeout: 10000
+            });
+            
+            if (result.data) {
+                setUserDetail(result.data);
+            }
+        } catch (err: any) {
+            console.error('Error refreshing user details:', err);
+        }
+    }
+
     if (loading && user) {
         return (
             <div className="flex min-h-screen items-center justify-center">
@@ -110,7 +126,7 @@ function Provider({
     }
 
     return (
-        <UserDetailContext.Provider value={{ userDetail, setUserDetail }}>
+        <UserDetailContext.Provider value={{ userDetail, setUserDetail, refreshUserDetails }}>
             {children}
         </UserDetailContext.Provider>
     )
