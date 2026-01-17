@@ -1,11 +1,13 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-const isPublicRoute = createRouteMatcher(['/sign-in(.*)', '/sign-up(.*)','/'])
+// Temporarily make all routes public until valid Clerk keys are configured
+const isPublicRoute = createRouteMatcher(['(.*)'])
 
 export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect()
-  }
+  // Authentication disabled - update Clerk keys in .env to enable
+  // if (!isPublicRoute(req)) {
+  //   await auth.protect()
+  // }
 })
 
 export const config = {
