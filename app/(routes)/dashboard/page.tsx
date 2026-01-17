@@ -5,9 +5,10 @@ import DoctorsAgentlist from './_components/DoctorsAgentlist';
 import AddNewSessionDialog from './_components/AddNewSessionDialog';
 import HealthTrendsDialog from './_components/HealthTrendsDialog';
 import UploadReportDialog from './_components/UploadReportDialog';
+import ImageAnalysisDialog from './_components/ImageAnalysisDialog';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { FloatingChatBot } from '@/components/FloatingChatBot';
-import { IconSparkles, IconStethoscope, IconCrown, IconMessageCircle } from '@tabler/icons-react';
+import { IconSparkles, IconStethoscope, IconCrown, IconMessageCircle, IconPhoto } from '@tabler/icons-react';
 import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { UserDetailContext } from '@/context/UserDetailcontext';
@@ -16,6 +17,7 @@ function DashboardContent() {
     const searchParams = useSearchParams();
     const { userDetail } = useContext(UserDetailContext);
     const [showChat, setShowChat] = React.useState(false);
+    const [showImageAnalysis, setShowImageAnalysis] = React.useState(false);
 
     useEffect(() => {
         const payment = searchParams.get('payment');
@@ -73,6 +75,21 @@ function DashboardContent() {
 
                 {/* Quick Actions Section */}
                 <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                    <div 
+                        onClick={() => setShowImageAnalysis(true)}
+                        className='rounded-2xl border bg-gradient-to-br from-orange-500/10 to-orange-600/5 p-6 hover:shadow-lg hover:border-orange-500/50 transition-all cursor-pointer'
+                    >
+                        <div className='mb-3 inline-flex rounded-full bg-orange-500/20 p-3'>
+                            <IconPhoto className='text-orange-600' size={24} />
+                        </div>
+                        <h3 className='mb-2 text-lg font-semibold'>Image Analysis</h3>
+                        <p className='text-sm text-muted-foreground'>Upload images of rashes, wounds, or symptoms for AI diagnosis</p>
+                        <div className='mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-600'>
+                            Click to analyze
+                            <span className='text-lg'>→</span>
+                        </div>
+                    </div>
+                    
                     <div className='rounded-2xl border bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-6 hover:shadow-lg transition-shadow cursor-pointer'>
                         <div className='mb-3 inline-flex rounded-full bg-blue-500/20 p-3'>
                             <IconSparkles className='text-blue-600' size={24} />
@@ -122,6 +139,9 @@ function DashboardContent() {
             
             {/* Floating Chat Bot - Pass showChat state */}
             <FloatingChatBot initialOpen={showChat} onClose={() => setShowChat(false)} />
+            
+            {/* Image Analysis Dialog */}
+            <ImageAnalysisDialog open={showImageAnalysis} onClose={() => setShowImageAnalysis(false)} />
         </ErrorBoundary>
     )
 }
