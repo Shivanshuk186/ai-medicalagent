@@ -4,7 +4,7 @@ import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IconHome, IconHistory, IconUserCircle, IconCurrencyDollar, IconMoon, IconSun } from "@tabler/icons-react";
+import { IconHome, IconHistory, IconUserCircle, IconCurrencyDollar, IconMoon, IconSun, IconAlertTriangle } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +14,7 @@ function AppHeader() {
 
     const navItems = [
         { href: '/dashboard', label: 'Home', icon: IconHome },
+        { href: '/emergency', label: 'Emergency', icon: IconAlertTriangle, highlight: true },
         { href: '/pricing', label: 'Pricing', icon: IconCurrencyDollar },
         { href: '/history', label: 'History', icon: IconHistory },
         { href: '/profile', label: 'Profile', icon: IconUserCircle },
@@ -29,13 +30,17 @@ function AppHeader() {
                 <div className='flex items-center gap-2 md:gap-6'>
                     {navItems.map((item) => {
                         const Icon = item.icon;
-                        const isActive = pathname === item.href;
+                        const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                         return (
                             <Link 
                                 key={item.href}
                                 href={item.href}
                                 className={`hidden items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors md:flex ${
-                                    isActive 
+                                    item.highlight
+                                        ? isActive 
+                                            ? 'bg-red-600 text-white hover:bg-red-700' 
+                                            : 'text-red-500 hover:bg-red-500/10'
+                                        : isActive 
                                         ? 'bg-primary/10 text-primary' 
                                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                                 }`}

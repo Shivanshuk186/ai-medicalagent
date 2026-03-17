@@ -4,6 +4,9 @@ import { db } from '@/config/db';
 import { PaymentTable, usersTable } from '@/config/schema';
 import { eq } from 'drizzle-orm';
 
+// Hardcoded admin email - only this email can access admin panel
+const ADMIN_EMAIL = 'shivanshuk186@gmail.com';
+
 export async function POST(req: NextRequest) {
   try {
     const { userId } = await auth();
@@ -19,14 +22,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin
-    const adminUser = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, adminEmail))
-      .limit(1);
-
-    if (!adminUser || adminUser.length === 0 || !adminUser[0].isAdmin) {
+    // Check if user email matches admin email
+    if (adminEmail !== ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

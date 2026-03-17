@@ -74,7 +74,8 @@ export default function AdminPage() {
       setPayments(response.data.payments || []);
     } catch (error) {
       console.error('Error fetching payments:', error);
-      toast.error('Failed to load payments');
+      // Silently fail for payments loading - show empty state instead
+      setPayments([]);
     } finally {
       setLoading(false);
     }

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/config/db';
-import { PaymentTable, usersTable } from '@/config/schema';
-import { eq } from 'drizzle-orm';
+import { PaymentTable } from '@/config/schema';
+
+// Hardcoded admin email - only this email can access admin panel
+const ADMIN_EMAIL = 'shivanshuk186@gmail.com';
 
 export async function GET(req: NextRequest) {
   try {
@@ -19,14 +21,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if user is admin
-    const dbUser = await db
-      .select()
-      .from(usersTable)
-      .where(eq(usersTable.email, userEmail))
-      .limit(1);
-
-    if (!dbUser || dbUser.length === 0 || !dbUser[0].isAdmin) {
+    // Check if user email matches admin email
+    if (userEmail !== ADMIN_EMAIL) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

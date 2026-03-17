@@ -3,6 +3,8 @@ import { openai } from "@/config/OpenAiModel";
 import { SessionChatTable } from "@/config/schema";
 import { db } from "@/config/db";
 import { eq } from "drizzle-orm";
+import { addPatientToQueue } from "@/lib/queueManager";
+import { classifySeverity, normalizeSymptoms } from "@/lib/triage";
 
 
 const REPORT_GEN_PROMPT=`You are an AI Medical Voice Agent that just finished a voice conversation with a user. Based on doctor AI agent info and Conversation between AI medical agent and user, generate a structured report with the following fields:
@@ -73,11 +75,29 @@ export async function POST(req: NextRequest) {
         const Resp = content.trim().replace('```json', '').replace('```', '');
         const JSONResp = JSON.parse(Resp);
 
-        // Save to db
-        const result = await db.update(SessionChatTable).set({
+        // Save consultation report and transcript
+        await db.update(SessionChatTable).set({
             report: JSONResp,
             conversation: messages
         }).where(eq(SessionChatTable.sessionId, sessionId));
+
+        const transcriptSymptoms = (Array.isArray(messages) ? messages : [])
+            .map((msg: any) => msg?.text || msg?.content || '')
+            .filter(Boolean)
+            .join(', ');
+
+        const symptoms = normalizeSymptoms(JSONResp?.symptoms?.length ? JSONResp.symptoms : transcriptSymptoms);
+
+        if (symptoms.length > 0) {
+            const priority = classifySeverity(symptoms);
+            const patientId = sessionDetail?.createdBy || JSONResp?.user || 'Anonymous';
+            const patientName = sessionDetail?.patientName || JSONResp?.user || 'Anonymous Patient';
+
+            await addPatientToQueue(patientId, patientName, symptoms, priority, {
+                assignedDoctor: sessionDetail?.selectedDoctor?.specialist,
+                createdBy: sessionDetail?.createdBy,
+            });
+        }
 
         return NextResponse.json(JSONResp);
 
